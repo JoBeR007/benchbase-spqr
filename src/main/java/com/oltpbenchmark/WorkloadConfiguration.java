@@ -41,6 +41,7 @@ public class WorkloadConfiguration {
   private double selectivity = -1.0;
   private int terminals;
   private int loaderThreads = ThreadUtil.availableProcessors();
+  private int warmupTime = 0;
   private XMLConfiguration xmlConfig = null;
   private WorkloadState workloadState;
   private TransactionTypes transTypes = null;
@@ -211,6 +212,14 @@ public class WorkloadConfiguration {
 
   public void setLoaderThreads(int loaderThreads) {
     this.loaderThreads = loaderThreads;
+  }
+
+  public int getWarmupTime() {
+    return this.warmupTime;
+  }
+
+  public void setWarmupTime(int time) {
+    this.warmupTime = time;
   }
 
   public double getSelectivity() {

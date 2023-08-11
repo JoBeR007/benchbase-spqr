@@ -21,7 +21,6 @@ import static com.oltpbenchmark.benchmarks.tpcc.TPCCConfig.*;
 
 import com.oltpbenchmark.benchmarks.tpcc.pojo.Customer;
 import com.oltpbenchmark.util.ThreadLocalRandomGenerator;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Random;
