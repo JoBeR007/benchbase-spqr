@@ -120,6 +120,7 @@ public class DBWorkload {
       wrkld.setUrl(xmlConfig.getString("url"));
       wrkld.setUsername(xmlConfig.getString("username"));
       wrkld.setPassword(xmlConfig.getString("password"));
+      wrkld.setPreferQueryMode("preferQueryMode");
       wrkld.setRandomSeed(xmlConfig.getInt("randomSeed", -1));
       wrkld.setBatchSize(xmlConfig.getInt("batchsize", 128));
       wrkld.setMaxRetries(xmlConfig.getInt("retries", 3));
@@ -468,14 +469,15 @@ public class DBWorkload {
         LOG.error("Unexpected error when creating benchmark database tables.", ex);
         System.exit(1);
       }
+
+      for (BenchmarkModule benchmark : benchList) {
+        benchmark.refreshCatalog();
+      }
     } else {
       LOG.debug("Skipping creating benchmark database tables");
     }
 
     // Refresh the catalog.
-    for (BenchmarkModule benchmark : benchList) {
-      benchmark.refreshCatalog();
-    }
 
     // Clear the Benchmark's Database
     if (isBooleanOptionSet(argsLine, "clear")) {

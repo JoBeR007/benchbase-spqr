@@ -84,8 +84,15 @@ public abstract class BenchmarkModule {
     if (StringUtils.isEmpty(workConf.getUsername())) {
       return DriverManager.getConnection(workConf.getUrl());
     } else {
-      return DriverManager.getConnection(
-          workConf.getUrl(), workConf.getUsername(), workConf.getPassword());
+      Properties properties = new Properties();
+      properties.setProperty("user", workConf.getUsername());
+      properties.setProperty("password", workConf.getPassword());
+
+      if(workConf.getDatabaseType() == DatabaseType.SPQR
+        || workConf.getDatabaseType() == DatabaseType.POSTGRES)
+        properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
+
+      return DriverManager.getConnection(workConf.getUrl(), properties);
     }
   }
 

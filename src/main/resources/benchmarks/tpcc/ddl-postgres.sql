@@ -9,141 +9,141 @@ DROP TABLE IF EXISTS item CASCADE;
 DROP TABLE IF EXISTS warehouse CASCADE;
 
 CREATE TABLE warehouse (
-    w_id       int            NOT NULL,
-    w_ytd      decimal(12, 2) NOT NULL,
-    w_tax      decimal(4, 4)  NOT NULL,
-    w_name     varchar(10)    NOT NULL,
-    w_street_1 varchar(20)    NOT NULL,
-    w_street_2 varchar(20)    NOT NULL,
-    w_city     varchar(20)    NOT NULL,
-    w_state    char(2)        NOT NULL,
-    w_zip      char(9)        NOT NULL,
-    PRIMARY KEY (w_id)
+    W_ID       int            NOT NULL,
+    W_YTD      decimal(12, 2) NOT NULL,
+    W_TAX      decimal(4, 4)  NOT NULL,
+    W_NAME     varchar(10)    NOT NULL,
+    W_STREET_1 varchar(20)    NOT NULL,
+    W_STREET_2 varchar(20)    NOT NULL,
+    W_CITY     varchar(20)    NOT NULL,
+    W_STATE    char(2)        NOT NULL,
+    W_ZIP      char(9)        NOT NULL,
+    PRIMARY KEY (W_ID)
 );
 
 CREATE TABLE item (
-    i_id    int           NOT NULL,
-    i_name  varchar(24)   NOT NULL,
-    i_price decimal(5, 2) NOT NULL,
-    i_data  varchar(50)   NOT NULL,
-    i_im_id int           NOT NULL,
-    PRIMARY KEY (i_id)
+    I_ID    int           NOT NULL,
+    I_NAME  varchar(24)   NOT NULL,
+    I_PRICE decimal(5, 2) NOT NULL,
+    I_DATA  varchar(50)   NOT NULL,
+    I_IM_ID int           NOT NULL,
+    PRIMARY KEY (I_ID)
 );
 
 CREATE TABLE stock (
-    s_w_id       int           NOT NULL,
-    s_i_id       int           NOT NULL,
-    s_quantity   int           NOT NULL,
-    s_ytd        decimal(8, 2) NOT NULL,
-    s_order_cnt  int           NOT NULL,
-    s_remote_cnt int           NOT NULL,
-    s_data       varchar(50)   NOT NULL,
-    s_dist_01    char(24)      NOT NULL,
-    s_dist_02    char(24)      NOT NULL,
-    s_dist_03    char(24)      NOT NULL,
-    s_dist_04    char(24)      NOT NULL,
-    s_dist_05    char(24)      NOT NULL,
-    s_dist_06    char(24)      NOT NULL,
-    s_dist_07    char(24)      NOT NULL,
-    s_dist_08    char(24)      NOT NULL,
-    s_dist_09    char(24)      NOT NULL,
-    s_dist_10    char(24)      NOT NULL,
-    FOREIGN KEY (s_w_id) REFERENCES warehouse (w_id) ON DELETE CASCADE,
-    FOREIGN KEY (s_i_id) REFERENCES item (i_id) ON DELETE CASCADE,
-    PRIMARY KEY (s_w_id, s_i_id)
+    S_W_ID       int           NOT NULL,
+    S_I_ID       int           NOT NULL,
+    S_QUANTITY   int           NOT NULL,
+    S_YTD        decimal(8, 2) NOT NULL,
+    S_ORDER_CNT  int           NOT NULL,
+    S_REMOTE_CNT int           NOT NULL,
+    S_DATA       varchar(50)   NOT NULL,
+    S_DIST_01    char(24)      NOT NULL,
+    S_DIST_02    char(24)      NOT NULL,
+    S_DIST_03    char(24)      NOT NULL,
+    S_DIST_04    char(24)      NOT NULL,
+    S_DIST_05    char(24)      NOT NULL,
+    S_DIST_06    char(24)      NOT NULL,
+    S_DIST_07    char(24)      NOT NULL,
+    S_DIST_08    char(24)      NOT NULL,
+    S_DIST_09    char(24)      NOT NULL,
+    S_DIST_10    char(24)      NOT NULL,
+    FOREIGN KEY (S_W_ID) REFERENCES warehouse (W_ID) ON DELETE CASCADE,
+    FOREIGN KEY (S_I_ID) REFERENCES item (I_ID) ON DELETE CASCADE,
+    PRIMARY KEY (S_W_ID, S_I_ID)
 );
 
 CREATE TABLE district (
-    d_w_id      int            NOT NULL,
-    d_id        int            NOT NULL,
-    d_ytd       decimal(12, 2) NOT NULL,
-    d_tax       decimal(4, 4)  NOT NULL,
-    d_next_o_id int            NOT NULL,
-    d_name      varchar(10)    NOT NULL,
-    d_street_1  varchar(20)    NOT NULL,
-    d_street_2  varchar(20)    NOT NULL,
-    d_city      varchar(20)    NOT NULL,
-    d_state     char(2)        NOT NULL,
-    d_zip       char(9)        NOT NULL,
-    FOREIGN KEY (d_w_id) REFERENCES warehouse (w_id) ON DELETE CASCADE,
-    PRIMARY KEY (d_w_id, d_id)
+    D_W_ID      int            NOT NULL,
+    D_ID        int            NOT NULL,
+    D_YTD       decimal(12, 2) NOT NULL,
+    D_TAX       decimal(4, 4)  NOT NULL,
+    D_NEXT_O_ID int            NOT NULL,
+    D_NAME      varchar(10)    NOT NULL,
+    D_STREET_1  varchar(20)    NOT NULL,
+    D_STREET_2  varchar(20)    NOT NULL,
+    D_CITY      varchar(20)    NOT NULL,
+    D_STATE     char(2)        NOT NULL,
+    D_ZIP       char(9)        NOT NULL,
+    FOREIGN KEY (D_W_ID) REFERENCES warehouse (W_ID) ON DELETE CASCADE,
+    PRIMARY KEY (D_W_ID, D_ID)
 );
 
 CREATE TABLE customer (
-    c_w_id         int            NOT NULL,
-    c_d_id         int            NOT NULL,
-    c_id           int            NOT NULL,
-    c_discount     decimal(4, 4)  NOT NULL,
-    c_credit       char(2)        NOT NULL,
-    c_last         varchar(16)    NOT NULL,
-    c_first        varchar(16)    NOT NULL,
-    c_credit_lim   decimal(12, 2) NOT NULL,
-    c_balance      decimal(12, 2) NOT NULL,
-    c_ytd_payment  float          NOT NULL,
-    c_payment_cnt  int            NOT NULL,
-    c_delivery_cnt int            NOT NULL,
-    c_street_1     varchar(20)    NOT NULL,
-    c_street_2     varchar(20)    NOT NULL,
-    c_city         varchar(20)    NOT NULL,
-    c_state        char(2)        NOT NULL,
-    c_zip          char(9)        NOT NULL,
-    c_phone        char(16)       NOT NULL,
-    c_since        timestamp      NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    c_middle       char(2)        NOT NULL,
-    c_data         varchar(500)   NOT NULL,
-    FOREIGN KEY (c_w_id, c_d_id) REFERENCES district (d_w_id, d_id) ON DELETE CASCADE,
-    PRIMARY KEY (c_w_id, c_d_id, c_id)
+    C_W_ID         int            NOT NULL,
+    C_D_ID         int            NOT NULL,
+    C_ID           int            NOT NULL,
+    C_DISCOUNT     decimal(4, 4)  NOT NULL,
+    C_CREDIT       char(2)        NOT NULL,
+    C_LAST         varchar(16)    NOT NULL,
+    C_FIRST        varchar(16)    NOT NULL,
+    C_CREDIT_LIM   decimal(12, 2) NOT NULL,
+    C_BALANCE      decimal(12, 2) NOT NULL,
+    C_YTD_PAYMENT  float          NOT NULL,
+    C_PAYMENT_CNT  int            NOT NULL,
+    C_DELIVERY_CNT int            NOT NULL,
+    C_STREET_1     varchar(20)    NOT NULL,
+    C_STREET_2     varchar(20)    NOT NULL,
+    C_CITY         varchar(20)    NOT NULL,
+    C_STATE        char(2)        NOT NULL,
+    C_ZIP          char(9)        NOT NULL,
+    C_PHONE        char(16)       NOT NULL,
+    C_SINCE        timestamp      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    C_MIDDLE       char(2)        NOT NULL,
+    C_DATA         varchar(500)   NOT NULL,
+    FOREIGN KEY (C_W_ID, C_D_ID) REFERENCES district (D_W_ID, D_ID) ON DELETE CASCADE,
+    PRIMARY KEY (C_W_ID, C_D_ID, C_ID)
 );
 
 CREATE TABLE history (
-    h_c_id   int           NOT NULL,
-    h_c_d_id int           NOT NULL,
-    h_c_w_id int           NOT NULL,
-    h_d_id   int           NOT NULL,
-    h_w_id   int           NOT NULL,
-    h_date   timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    h_amount decimal(6, 2) NOT NULL,
-    h_data   varchar(24)   NOT NULL,
-    FOREIGN KEY (h_c_w_id, h_c_d_id, h_c_id) REFERENCES customer (c_w_id, c_d_id, c_id) ON DELETE CASCADE,
-    FOREIGN KEY (h_w_id, h_d_id) REFERENCES district (d_w_id, d_id) ON DELETE CASCADE
+    H_C_ID   int           NOT NULL,
+    H_C_D_ID int           NOT NULL,
+    H_C_W_ID int           NOT NULL,
+    H_D_ID   int           NOT NULL,
+    H_W_ID   int           NOT NULL,
+    H_DATE   timestamp     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    H_AMOUNT decimal(6, 2) NOT NULL,
+    H_DATA   varchar(24)   NOT NULL,
+    FOREIGN KEY (H_C_W_ID, H_C_D_ID, H_C_ID) REFERENCES customer (C_W_ID, C_D_ID, C_ID) ON DELETE CASCADE,
+    FOREIGN KEY (H_W_ID, H_D_ID) REFERENCES district (D_W_ID, D_ID) ON DELETE CASCADE
 );
 
 CREATE TABLE oorder (
-    o_w_id       int       NOT NULL,
-    o_d_id       int       NOT NULL,
-    o_id         int       NOT NULL,
-    o_c_id       int       NOT NULL,
-    o_carrier_id int                DEFAULT NULL,
-    o_ol_cnt     int       NOT NULL,
-    o_all_local  int       NOT NULL,
-    o_entry_d    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (o_w_id, o_d_id, o_id),
-    FOREIGN KEY (o_w_id, o_d_id, o_c_id) REFERENCES customer (c_w_id, c_d_id, c_id) ON DELETE CASCADE,
-    UNIQUE (o_w_id, o_d_id, o_c_id, o_id)
+    O_W_ID       int       NOT NULL,
+    O_D_ID       int       NOT NULL,
+    O_ID         int       NOT NULL,
+    O_C_ID       int       NOT NULL,
+    O_CARRIER_ID int                DEFAULT NULL,
+    O_OL_CNT     int       NOT NULL,
+    O_ALL_LOCAL  int       NOT NULL,
+    O_ENTRY_D    timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (O_W_ID, O_D_ID, O_ID),
+    FOREIGN KEY (O_W_ID, O_D_ID, O_C_ID) REFERENCES customer (C_W_ID, C_D_ID, C_ID) ON DELETE CASCADE,
+    UNIQUE (O_W_ID, O_D_ID, O_C_ID, O_ID)
 );
 
 CREATE TABLE new_order (
-    no_w_id int NOT NULL,
-    no_d_id int NOT NULL,
-    no_o_id int NOT NULL,
-    FOREIGN KEY (no_w_id, no_d_id, no_o_id) REFERENCES oorder (o_w_id, o_d_id, o_id) ON DELETE CASCADE,
-    PRIMARY KEY (no_w_id, no_d_id, no_o_id)
+    NO_W_ID int NOT NULL,
+    NO_D_ID int NOT NULL,
+    NO_O_ID int NOT NULL,
+    FOREIGN KEY (NO_W_ID, NO_D_ID, NO_O_ID) REFERENCES oorder (O_W_ID, O_D_ID, O_ID) ON DELETE CASCADE,
+    PRIMARY KEY (NO_W_ID, NO_D_ID, NO_O_ID)
 );
 
 CREATE TABLE order_line (
-    ol_w_id        int           NOT NULL,
-    ol_d_id        int           NOT NULL,
-    ol_o_id        int           NOT NULL,
-    ol_number      int           NOT NULL,
-    ol_i_id        int           NOT NULL,
-    ol_delivery_d  timestamp     NULL DEFAULT NULL,
-    ol_amount      decimal(6, 2) NOT NULL,
-    ol_supply_w_id int           NOT NULL,
-    ol_quantity    decimal(6,2)  NOT NULL,
-    ol_dist_info   char(24)      NOT NULL,
-    FOREIGN KEY (ol_w_id, ol_d_id, ol_o_id) REFERENCES oorder (o_w_id, o_d_id, o_id) ON DELETE CASCADE,
-    FOREIGN KEY (ol_supply_w_id, ol_i_id) REFERENCES stock (s_w_id, s_i_id) ON DELETE CASCADE,
-    PRIMARY KEY (ol_w_id, ol_d_id, ol_o_id, ol_number)
+    OL_W_ID        int           NOT NULL,
+    OL_D_ID        int           NOT NULL,
+    OL_O_ID        int           NOT NULL,
+    OL_NUMBER      int           NOT NULL,
+    OL_I_ID        int           NOT NULL,
+    OL_DELIVERY_D  timestamp     NULL DEFAULT NULL,
+    OL_AMOUNT      decimal(6, 2) NOT NULL,
+    OL_SUPPLY_W_ID int           NOT NULL,
+    OL_QUANTITY    decimal(6,2)  NOT NULL,
+    OL_DIST_INFO   char(24)      NOT NULL,
+    FOREIGN KEY (OL_W_ID, OL_D_ID, OL_O_ID) REFERENCES oorder (O_W_ID, O_D_ID, O_ID) ON DELETE CASCADE,
+    FOREIGN KEY (OL_SUPPLY_W_ID, OL_I_ID) REFERENCES stock (S_W_ID, S_I_ID) ON DELETE CASCADE,
+    PRIMARY KEY (OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER)
 );
 
-CREATE INDEX idx_customer_name ON customer (c_w_id, c_d_id, c_last, c_first);
+CREATE INDEX idx_customer_name ON customer (C_W_ID, C_D_ID, C_LAST, C_FIRST);

@@ -60,6 +60,7 @@ public class WorkloadConfiguration {
    * primary-secondary failover.
    */
   private boolean reconnectOnConnectionFailure = false;
+  private String preferQueryMode = "";
 
   public String getBenchmarkName() {
     return benchmarkName;
@@ -215,6 +216,14 @@ public class WorkloadConfiguration {
 
   public void setSelectivity(double selectivity) {
     this.selectivity = selectivity;
+  }
+
+  public String getPreferQueryMode() {
+    return preferQueryMode;
+  }
+
+  public void setPreferQueryMode(String preferQueryMode) {
+    this.preferQueryMode = preferQueryMode;
   }
 
   /**

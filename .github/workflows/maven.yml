@@ -64,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        profile: [ 'cockroachdb', 'mariadb', 'mysql', 'oracle', 'phoenix', 'postgres', 'spanner', 'sqlite', 'sqlserver' ]
+        profile: [ 'cockroachdb', 'mariadb', 'mysql', 'oracle', 'phoenix', 'postgres', 'spanner', 'spqr', 'sqlite', 'sqlserver' ]
     steps:
     - name: Checkout repo
       uses: actions/checkout@v4
@@ -433,6 +433,82 @@ jobs:
       - name: Delete artifact
         run: |
           rm -rf benchbase-postgres.tgz
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{env.JAVA_VERSION}}
+          distribution: 'temurin'
+
+      - name: Run benchmark
+        run: |
+          PGPASSWORD=password dropdb -h localhost -U admin benchbase --if-exists
+          PGPASSWORD=password createdb -h localhost -U admin benchbase
+
+          # For templated benchmarks, we need to preload some data for the test since by design, templated benchmarks do not support the 'load' operation
+          # In this case, we load the tpcc data.
+          if [[ ${{matrix.benchmark}} == templated ]]; then
+            java -jar benchbase.jar -b tpcc -c config/postgres/sample_tpcc_config.xml --create=true --load=true --execute=false --json-histograms results/histograms.json
+            java -jar benchbase.jar -b ${{matrix.benchmark}} -c config/postgres/sample_${{matrix.benchmark}}_config.xml --create=false --load=false --execute=true --json-histograms results/histograms.json
+          elif [[ ${{matrix.benchmark}} == tpcc-with-reconnects ]]; then
+            # See Also: WITH_SERVICE_INTERRUPTIONS=true docker/build-run-benchmark-with-docker.sh
+            java -jar benchbase.jar -b tpcc -c config/postgres/sample_tpcc_config.xml --create=true --load=true
+            (sleep 10 && ./scripts/interrupt-docker-db-service.sh postgres) &
+            java -jar benchbase.jar -b tpcc -c config/postgres/sample_tpcc_config.xml --execute=true --json-histograms results/histograms.json
+          else
+            java -jar benchbase.jar -b ${{matrix.benchmark}} -c config/postgres/sample_${{matrix.benchmark}}_config.xml --create=true --load=true --execute=true --json-histograms results/histograms.json
+          fi
+
+          # FIXME: Reduce the error rate so we don't need these overrides.
+          results_benchmark=${{matrix.benchmark}}
+          if [ ${{matrix.benchmark}} == auctionmark ]; then
+              ERRORS_THRESHOLD=0.02
+          elif [ ${{matrix.benchmark}} == tatp ]; then
+              ERRORS_THRESHOLD=0.05
+          elif [ ${{matrix.benchmark}} == tpcc-with-reconnects ]; then
+              ERRORS_THRESHOLD=0.02
+              results_benchmark=tpcc
+          fi
+          ./scripts/check_latest_benchmark_results.sh $results_benchmark
+          ./scripts/check_histogram_results.sh results/histograms.json $ERRORS_THRESHOLD
+
+  ## ----------------------------------------------------------------------------------
+  ## SPQR
+  ## ----------------------------------------------------------------------------------
+  spqr:
+    needs: package-and-upload
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        benchmark: [ 'auctionmark', 'epinions', 'hyadapt', 'noop', 'otmetrics', 'resourcestresser', 'seats', 'sibench', 'smallbank', 'tatp', 'templated', 'tpcc', 'tpcc-with-reconnects', 'tpch', 'twitter', 'voter', 'wikipedia', 'ycsb' ]
+    services:
+      postgres: # https://hub.docker.com/_/postgres
+        image: postgres:latest
+        env:
+          POSTGRES_DB: benchbase
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: benchbase-spqr
+
+      - name: Extract artifact
+        run: |
+          tar xvzf benchbase-spqr.tgz --strip-components=1
+
+      - name: Delete artifact
+        run: |
+          rm -rf benchbase-spqr.tgz
 
       - name: Set up JDK
         uses: actions/setup-java@v4

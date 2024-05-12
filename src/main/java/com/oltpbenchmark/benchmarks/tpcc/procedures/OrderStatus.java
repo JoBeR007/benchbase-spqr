@@ -180,9 +180,12 @@ public class OrderStatus extends TPCCProcedure {
       // find the newest order for the customer
       // retrieve the carrier & order date for the most recent order.
 
-      ordStatGetNewestOrd.setInt(1, w_id);
+      /*ordStatGetNewestOrd.setInt(1, w_id);
       ordStatGetNewestOrd.setInt(2, d_id);
-      ordStatGetNewestOrd.setInt(3, c.c_id);
+      ordStatGetNewestOrd.setInt(3, c.c_id);*/
+      ordStatGetNewestOrd.setString(1, String.valueOf(w_id));
+      ordStatGetNewestOrd.setString(2, String.valueOf(d_id));
+      ordStatGetNewestOrd.setString(3, String.valueOf(c.c_id));
 
       try (ResultSet rs = ordStatGetNewestOrd.executeQuery()) {
 
@@ -209,9 +212,12 @@ public class OrderStatus extends TPCCProcedure {
 
     try (PreparedStatement ordStatGetOrderLines =
         this.getPreparedStatement(conn, ordStatGetOrderLinesSQL)) {
-      ordStatGetOrderLines.setInt(1, o_id);
+      /*ordStatGetOrderLines.setInt(1, o_id);
       ordStatGetOrderLines.setInt(2, d_id);
-      ordStatGetOrderLines.setInt(3, w_id);
+      ordStatGetOrderLines.setInt(3, w_id);*/
+      ordStatGetOrderLines.setString(1, String.valueOf(o_id));
+      ordStatGetOrderLines.setString(2, String.valueOf(d_id));
+      ordStatGetOrderLines.setString(3, String.valueOf(w_id));
 
       try (ResultSet rs = ordStatGetOrderLines.executeQuery()) {
 
@@ -255,9 +261,12 @@ public class OrderStatus extends TPCCProcedure {
 
     try (PreparedStatement payGetCust = this.getPreparedStatement(conn, payGetCustSQL)) {
 
-      payGetCust.setInt(1, c_w_id);
+      /*payGetCust.setInt(1, c_w_id);
       payGetCust.setInt(2, c_d_id);
-      payGetCust.setInt(3, c_id);
+      payGetCust.setInt(3, c_id);*/
+      payGetCust.setString(1, String.valueOf(c_w_id));
+      payGetCust.setString(2, String.valueOf(c_d_id));
+      payGetCust.setString(3, String.valueOf(c_id));
 
       try (ResultSet rs = payGetCust.executeQuery()) {
 
@@ -285,8 +294,11 @@ public class OrderStatus extends TPCCProcedure {
 
     try (PreparedStatement customerByName = this.getPreparedStatement(conn, customerByNameSQL)) {
 
-      customerByName.setInt(1, c_w_id);
+      /*customerByName.setInt(1, c_w_id);
       customerByName.setInt(2, c_d_id);
+      customerByName.setString(3, c_last);*/
+      customerByName.setString(1, String.valueOf(c_w_id));
+      customerByName.setString(2, String.valueOf(c_d_id));
       customerByName.setString(3, c_last);
 
       try (ResultSet rs = customerByName.executeQuery()) {
