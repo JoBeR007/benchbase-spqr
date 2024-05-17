@@ -17,8 +17,10 @@
 
 package com.oltpbenchmark.api;
 
+import com.oltpbenchmark.types.DatabaseType;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,18 +41,35 @@ public abstract class LoaderThread implements Runnable {
   @Override
   public final void run() {
     beforeLoad();
-    try (Connection conn = benchmarkModule.makeConnection()) {
-      load(conn);
-    } catch (SQLException ex) {
-      SQLException next_ex = ex.getNextException();
-      String msg =
-          String.format(
-              "Unexpected error when loading %s database",
-              benchmarkModule.getBenchmarkName().toUpperCase());
-      LOG.error(msg, next_ex);
-      throw new RuntimeException(ex);
-    } finally {
-      afterLoad();
+    if (benchmarkModule.workConf.getDatabaseType() != DatabaseType.SPQR) {
+      try (Connection conn = benchmarkModule.makeConnection()) {
+        load(conn);
+      } catch (SQLException ex) {
+        SQLException next_ex = ex.getNextException();
+        String msg =
+            String.format(
+                "Unexpected error when loading %s database",
+                benchmarkModule.getBenchmarkName().toUpperCase());
+        LOG.error(msg, next_ex);
+        throw new RuntimeException(ex);
+      } finally {
+        afterLoad();
+      }
+    } else {
+      try {
+        List<Connection> connections = benchmarkModule.makeShardConnections();
+        load(connections);
+      } catch (SQLException ex) {
+        SQLException next_ex = ex.getNextException();
+        String msg =
+            String.format(
+                "Unexpected error when loading %s database",
+                benchmarkModule.getBenchmarkName().toUpperCase());
+        LOG.error(msg, next_ex);
+        throw new RuntimeException(ex);
+      } finally {
+        afterLoad();
+      }
     }
   }
 
@@ -60,7 +79,16 @@ public abstract class LoaderThread implements Runnable {
    * @param conn
    * @throws SQLException
    */
-  public abstract void load(Connection conn) throws SQLException;
+  public void load(Connection conn) throws SQLException {}
+
+  /**
+   * Method that SPQR LoaderThread has to implement in order to be able to load data directly to
+   * shards
+   *
+   * @param connections
+   * @throws SQLException
+   */
+  public void load(List<Connection> connections) throws SQLException {}
 
   public void beforeLoad() {
     // useful for implementing waits for countdown latches, this ensures we open the connection

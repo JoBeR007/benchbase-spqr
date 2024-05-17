@@ -50,6 +50,8 @@ public class DBWorkload {
 
   private static final String RATE_DISABLED = "disabled";
   private static final String RATE_UNLIMITED = "unlimited";
+  private static Boolean useRealThreads = false;
+  private static DatabaseType databaseType;
 
   /**
    * @param args
@@ -77,6 +79,10 @@ public class DBWorkload {
       LOG.error("Missing Benchmark Class to load");
       printUsage(options);
       return;
+    }
+
+    if (argsLine.hasOption("rt")) {
+      useRealThreads = true;
     }
 
     // Seconds
@@ -115,9 +121,10 @@ public class DBWorkload {
       wrkld.setXmlConfig(xmlConfig);
 
       // Pull in database configuration
-      wrkld.setDatabaseType(DatabaseType.get(xmlConfig.getString("type")));
+      databaseType = DatabaseType.get(xmlConfig.getString("type"));
+      wrkld.setDatabaseType(databaseType);
       wrkld.setDriverClass(xmlConfig.getString("driver"));
-      wrkld.setUrl(xmlConfig.getString("url"));
+      wrkld.setUrl(xmlConfig.getString("routerUrl"));
       wrkld.setUsername(xmlConfig.getString("username"));
       wrkld.setPassword(xmlConfig.getString("password"));
       wrkld.setPreferQueryMode(xmlConfig.getString("preferQueryMode"));
@@ -127,7 +134,20 @@ public class DBWorkload {
       wrkld.setNewConnectionPerTxn(xmlConfig.getBoolean("newConnectionPerTxn", false));
       wrkld.setReconnectOnConnectionFailure(
           xmlConfig.getBoolean("reconnectOnConnectionFailure", false));
-
+      wrkld.setShardUrls(Arrays.asList(xmlConfig.getStringArray("shardUrls/shardUrl")));
+      String[] upperLimitsStr = xmlConfig.getStringArray("upperLimits/upperLimit");
+      List<Integer> upperLimits =
+          Arrays.stream(upperLimitsStr)
+              .map(
+                  string -> {
+                    try {
+                      return Integer.parseInt(string);
+                    } catch (NumberFormatException e) {
+                      throw new NumberFormatException("Error while trying to parse upper limits");
+                    }
+                  })
+              .toList();
+      wrkld.setUpperLimitsPerShard(upperLimits);
       int terminals = xmlConfig.getInt("terminals[not(@bench)]", 0);
       terminals = xmlConfig.getInt("terminals" + pluginTest, terminals);
       wrkld.setTerminals(terminals);
@@ -140,7 +160,9 @@ public class DBWorkload {
       String isolationMode =
           xmlConfig.getString("isolation[not(@bench)]", "TRANSACTION_SERIALIZABLE");
       wrkld.setIsolationMode(xmlConfig.getString("isolation" + pluginTest, isolationMode));
-      wrkld.setScaleFactor(xmlConfig.getDouble("scalefactor", 1.0));
+      if (wrkld.getDatabaseType() == DatabaseType.SPQR && wrkld.getBenchmarkName().equals("tpcc"))
+        wrkld.setScaleFactor(upperLimits.get(upperLimits.size() - 1));
+      else wrkld.setScaleFactor(xmlConfig.getDouble("scalefactor", 1.0));
       wrkld.setDataDir(xmlConfig.getString("datadir", "."));
       wrkld.setDDLPath(xmlConfig.getString("ddlpath", null));
 
@@ -469,16 +491,16 @@ public class DBWorkload {
         LOG.error("Unexpected error when creating benchmark database tables.", ex);
         System.exit(1);
       }
-
-      for (BenchmarkModule benchmark : benchList) {
-        benchmark.refreshCatalog();
-      }
     } else {
       LOG.debug("Skipping creating benchmark database tables");
     }
 
     // Refresh the catalog.
-
+    if (databaseType != DatabaseType.SPQR) {
+      for (BenchmarkModule benchmark : benchList) {
+        benchmark.refreshCatalog();
+      }
+    }
     // Clear the Benchmark's Database
     if (isBooleanOptionSet(argsLine, "clear")) {
       try {
@@ -569,6 +591,7 @@ public class DBWorkload {
         "Base directory for the result files, default is current directory");
     options.addOption(null, "dialects-export", true, "Export benchmark SQL to a dialects file");
     options.addOption("jh", "json-histograms", true, "Export histograms to JSON file");
+    options.addOption("rt", "real-threads", false, "Use real threads");
     return options;
   }
 
@@ -750,7 +773,8 @@ public class DBWorkload {
               bench.getBenchmarkName().toUpperCase(), num_phases, (num_phases > 1 ? "s" : "")));
       workConfs.add(bench.getWorkloadConfiguration());
     }
-    Results r = ThreadBench.runRateLimitedBenchmark(workers, workConfs, intervalMonitor);
+    Results r =
+        ThreadBench.runRateLimitedBenchmark(workers, workConfs, intervalMonitor, useRealThreads);
     LOG.info(SINGLE_LINE);
     LOG.info("Rate limited reqs/s: {}", r);
     return r;

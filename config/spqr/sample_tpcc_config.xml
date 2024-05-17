@@ -4,7 +4,7 @@
     <!-- Connection details -->
     <type>SPQR</type>
     <driver>org.postgresql.Driver</driver>
-    <url>jdbc:postgresql://localhost:18432/db1?sslmode=disable</url>
+    <routerUrl>jdbc:postgresql://localhost:18432/db1?sslmode=disable</routerUrl>
     <username>dvkashapov</username>
     <password>password</password>
     <preferQueryMode>simple</preferQueryMode>
@@ -12,13 +12,21 @@
     <isolation>TRANSACTION_SERIALIZABLE</isolation>
     <batchsize>128</batchsize>
 
-    <!-- Scale factor is the number of warehouses in TPCC -->
-    <scalefactor>2</scalefactor>
+    <shardUrls>
+        <shardUrl>jdbc:postgresql://localhost:5550/db1?sslmode=disable</shardUrl>
+        <shardUrl>jdbc:postgresql://localhost:5551/db1?sslmode=disable</shardUrl>
+    </shardUrls>
 
+    <!-- Upper limits are the highest warehouse id (up to and including) that is stored at corresponding shard-->
+    <upperLimits>
+        <upperLimit>1</upperLimit>
+        <upperLimit>2</upperLimit>
+    </upperLimits>
     <!-- The workload -->
-    <terminals>1</terminals>
+    <terminals>2</terminals>
     <works>
         <work>
+            <warmup>30</warmup>
             <time>300</time>
             <rate>unlimited</rate>
             <weights>45,43,4,4,4</weights>

@@ -88,12 +88,30 @@ public abstract class BenchmarkModule {
       properties.setProperty("user", workConf.getUsername());
       properties.setProperty("password", workConf.getPassword());
 
-      if(workConf.getDatabaseType() == DatabaseType.SPQR
-        || workConf.getDatabaseType() == DatabaseType.POSTGRES)
+      if (workConf.getDatabaseType() == DatabaseType.SPQR
+          || workConf.getDatabaseType() == DatabaseType.POSTGRES)
         properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
 
       return DriverManager.getConnection(workConf.getUrl(), properties);
     }
+  }
+
+  public final List<Connection> makeShardConnections() throws SQLException {
+    List<Connection> res = new ArrayList<>();
+
+    for (int i = 0; i < workConf.getShardUrls().size(); i++) {
+      if (StringUtils.isEmpty(workConf.getUsername())) {
+        res.add(DriverManager.getConnection(workConf.getShardUrls().get(i)));
+      } else {
+        Properties properties = new Properties();
+        properties.setProperty("user", workConf.getUsername());
+        properties.setProperty("password", workConf.getPassword());
+        properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
+
+        res.add(DriverManager.getConnection(workConf.getShardUrls().get(i), properties));
+      }
+    }
+    return res;
   }
 
   private String afterLoadScriptPath = null;

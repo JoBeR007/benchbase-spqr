@@ -60,7 +60,10 @@ public class WorkloadConfiguration {
    * primary-secondary failover.
    */
   private boolean reconnectOnConnectionFailure = false;
+
   private String preferQueryMode = "";
+  private List<String> shardUrls;
+  private List<Integer> upperLimitsPerShard;
 
   public String getBenchmarkName() {
     return benchmarkName;
@@ -418,5 +421,21 @@ public class WorkloadConfiguration {
         + dataDir
         + '\''
         + '}';
+  }
+
+  public List<String> getShardUrls() {
+    return shardUrls;
+  }
+
+  public void setShardUrls(List<String> shardUrls) {
+    this.shardUrls = shardUrls;
+  }
+
+  public List<Integer> getUpperLimitsPerShard() {
+    return upperLimitsPerShard;
+  }
+
+  public void setUpperLimitsPerShard(List<Integer> upperLimitsPerShard) {
+    this.upperLimitsPerShard = upperLimitsPerShard;
   }
 }
