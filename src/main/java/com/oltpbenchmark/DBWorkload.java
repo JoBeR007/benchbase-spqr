@@ -124,7 +124,7 @@ public class DBWorkload {
       databaseType = DatabaseType.get(xmlConfig.getString("type"));
       wrkld.setDatabaseType(databaseType);
       wrkld.setDriverClass(xmlConfig.getString("driver"));
-      wrkld.setUrl(xmlConfig.getString("routerUrl"));
+      wrkld.setUrl(xmlConfig.getString("url"));
       wrkld.setUsername(xmlConfig.getString("username"));
       wrkld.setPassword(xmlConfig.getString("password"));
       wrkld.setPreferQueryMode(xmlConfig.getString("preferQueryMode"));

@@ -4,8 +4,9 @@
     <!-- Connection details -->
     <type>SPQR</type>
     <driver>org.postgresql.Driver</driver>
-    <routerUrl>jdbc:postgresql://localhost:18432/db1?sslmode=disable</routerUrl>
-    <username>dvkashapov</username>
+    <!-- Router Url -->
+    <url>jdbc:postgresql://localhost:18432/db1?sslmode=disable</url>
+    <username>user1</username>
     <password>password</password>
     <preferQueryMode>simple</preferQueryMode>
     <reconnectOnConnectionFailure>true</reconnectOnConnectionFailure>

@@ -374,7 +374,6 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
       item.i_im_id = TPCCUtil.randomNumber(1, 10000, benchmark.rng());
       items[i] = item;
     }
-    LOG.info("LENGTH {}", items.length);
     return items;
   }
 
