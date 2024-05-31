@@ -234,8 +234,15 @@ public abstract class BenchmarkModule {
    * (e.g., table, indexes, etc) needed for this benchmark
    */
   public final void createDatabase() throws SQLException, IOException {
-    try (Connection conn = this.makeConnection()) {
-      this.createDatabase(this.workConf.getDatabaseType(), conn);
+    if (this.workConf.getDatabaseType() != DatabaseType.SPQR) {
+      try (Connection conn = this.makeConnection()) {
+        this.createDatabase(this.workConf.getDatabaseType(), conn);
+      }
+    } else {
+      List<Connection> connections = this.makeShardConnections();
+      for (Connection c : connections) {
+        this.createDatabase(this.workConf.getDatabaseType(), c);
+      }
     }
   }
 
