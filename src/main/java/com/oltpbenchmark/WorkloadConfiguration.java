@@ -65,6 +65,7 @@ public class WorkloadConfiguration {
   private String preferQueryMode = "";
   private List<String> shardUrls;
   private List<Integer> upperLimitsPerShard;
+  private int startFromId = 0;
 
   public String getBenchmarkName() {
     return benchmarkName;
@@ -432,19 +433,30 @@ public class WorkloadConfiguration {
         + '}';
   }
 
+  /** Returns list of urls for straight to shard connection */
   public List<String> getShardUrls() {
     return shardUrls;
   }
 
+  /** Sets list of urls for straight to shard connection */
   public void setShardUrls(List<String> shardUrls) {
     this.shardUrls = shardUrls;
   }
 
+  /** In TPC-C context warehouse id's that are stored at corresponding shard number */
   public List<Integer> getUpperLimitsPerShard() {
     return upperLimitsPerShard;
   }
 
   public void setUpperLimitsPerShard(List<Integer> upperLimitsPerShard) {
     this.upperLimitsPerShard = upperLimitsPerShard;
+  }
+
+  public int getStartFromId() {
+    return startFromId;
+  }
+
+  public void setStartFromId(int startFromId) {
+    this.startFromId = startFromId;
   }
 }

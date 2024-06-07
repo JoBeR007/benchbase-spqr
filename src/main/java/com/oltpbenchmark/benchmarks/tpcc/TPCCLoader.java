@@ -75,7 +75,8 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
     // ITEM
     // This will be invoked first and executed in a single thread.
     if (this.getDatabaseType() != DatabaseType.SPQR) {
-      LoaderThread itemsLoader =
+      if (workConf.getStartFromId() == 1) {
+        LoaderThread itemsLoader =
           new LoaderThread(this.benchmark) {
             @Override
             public void load(Connection conn) {
@@ -87,12 +88,14 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
               itemLatch.countDown();
             }
           };
-      threads.add(itemsLoader);
+        threads.add(itemsLoader);
+      }
     } else {
-      int numShards = workConf.getShardUrls().size();
-      for (int i = 0; i < numShards; i++) {
-        int shard = i;
-        LoaderThread itemsLoader =
+      if (workConf.getStartFromId() == 1) {
+        int numShards = workConf.getShardUrls().size();
+        for (int i = 0; i < numShards; i++) {
+          int shard = i;
+          LoaderThread itemsLoader =
             new LoaderThread(this.benchmark) {
               @Override
               public void load(List<Connection> connections) {
@@ -104,7 +107,8 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                 itemLatch.countDown();
               }
             };
-        threads.add(itemsLoader);
+          threads.add(itemsLoader);
+        }
       }
     }
 
@@ -114,7 +118,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
     // to wait until the ITEM table is loaded first though.
 
     if (this.getDatabaseType() != DatabaseType.SPQR) {
-      for (int w = 1; w <= numWarehouses; w++) {
+      for (int w = workConf.getStartFromId(); w <= numWarehouses; w++) {
         final int w_id = w;
         LoaderThread t =
             new LoaderThread(this.benchmark) {
@@ -190,7 +194,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
         threads.add(t);
       }
     } else {
-      int warehouse = 1;
+      int warehouse = workConf.getStartFromId();
       int numShards = workConf.getShardUrls().size();
       List<Integer> upperLimits = workConf.getUpperLimitsPerShard();
 

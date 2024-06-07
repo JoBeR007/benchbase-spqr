@@ -91,6 +91,11 @@ public class DBWorkload {
       intervalMonitor = Integer.parseInt(argsLine.getOptionValue("im"));
     }
 
+    int startFromId = 1;
+    if (argsLine.hasOption("sf")) {
+      startFromId = Integer.parseInt(argsLine.getOptionValue("sf"));
+    }
+
     // -------------------------------------------------------------------
     // GET PLUGIN LIST
     // -------------------------------------------------------------------
@@ -165,6 +170,7 @@ public class DBWorkload {
       else wrkld.setScaleFactor(xmlConfig.getDouble("scalefactor", 1.0));
       wrkld.setDataDir(xmlConfig.getString("datadir", "."));
       wrkld.setDDLPath(xmlConfig.getString("ddlpath", null));
+      wrkld.setStartFromId(startFromId);
 
       double selectivity = -1;
       try {
@@ -593,6 +599,7 @@ public class DBWorkload {
     options.addOption(null, "dialects-export", true, "Export benchmark SQL to a dialects file");
     options.addOption("jh", "json-histograms", true, "Export histograms to JSON file");
     options.addOption("rt", "real-threads", false, "Use real threads");
+    options.addOption("sf", "start-from-id", true, "Start load from a specific scale id");
     return options;
   }
 
