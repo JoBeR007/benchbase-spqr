@@ -66,6 +66,7 @@ public class WorkloadConfiguration {
   private List<String> shardUrls;
   private List<Integer> upperLimitsPerShard;
   private int startFromId = 0;
+  private boolean isPostfixNames = false;
 
   public String getBenchmarkName() {
     return benchmarkName;
@@ -458,5 +459,13 @@ public class WorkloadConfiguration {
 
   public void setStartFromId(int startFromId) {
     this.startFromId = startFromId;
+  }
+
+  public boolean isPostfixNames() {
+    return isPostfixNames;
+  }
+
+  public void setPostfixNames(boolean postfixNames) {
+    isPostfixNames = postfixNames;
   }
 }

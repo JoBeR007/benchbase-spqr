@@ -190,7 +190,11 @@ public abstract class BenchmarkModule {
       DatabaseType ddl_db_type = db_type;
       // HACK: Use MySQL if we're given MariaDB
       if (ddl_db_type == DatabaseType.MARIADB) ddl_db_type = DatabaseType.MYSQL;
-      names.add("ddl-" + ddl_db_type.name().toLowerCase() + ".sql");
+      names.add(
+          "ddl-"
+              + ddl_db_type.name().toLowerCase()
+              + (workConf.isPostfixNames() ? "-orig" : "")
+              + ".sql");
     }
     names.add("ddl-generic.sql");
 

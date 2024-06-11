@@ -51,6 +51,7 @@ public class DBWorkload {
   private static final String RATE_DISABLED = "disabled";
   private static final String RATE_UNLIMITED = "unlimited";
   private static Boolean useRealThreads = false;
+  private static Boolean usePostfixNames = false;
   private static DatabaseType databaseType;
 
   /**
@@ -83,6 +84,10 @@ public class DBWorkload {
 
     if (argsLine.hasOption("rt")) {
       useRealThreads = true;
+    }
+
+    if (argsLine.hasOption("pn")) {
+      usePostfixNames = true;
     }
 
     // Seconds
@@ -171,6 +176,7 @@ public class DBWorkload {
       wrkld.setDataDir(xmlConfig.getString("datadir", "."));
       wrkld.setDDLPath(xmlConfig.getString("ddlpath", null));
       wrkld.setStartFromId(startFromId);
+      wrkld.setPostfixNames(usePostfixNames);
 
       double selectivity = -1;
       try {
@@ -600,6 +606,11 @@ public class DBWorkload {
     options.addOption("jh", "json-histograms", true, "Export histograms to JSON file");
     options.addOption("rt", "real-threads", false, "Use real threads");
     options.addOption("sf", "start-from-id", true, "Start load from a specific scale id");
+    options.addOption(
+        "pn",
+        "postfix-names",
+        false,
+        "Use TPC-C table names with postfix \"_orig\" in create and load phase for SPQR");
     return options;
   }
 

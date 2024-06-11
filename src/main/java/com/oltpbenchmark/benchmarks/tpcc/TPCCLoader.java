@@ -31,31 +31,79 @@ import java.util.concurrent.CountDownLatch;
 /** TPC-C Benchmark Loader */
 public final class TPCCLoader extends Loader<TPCCBenchmark> {
 
-  public final SQLStmt itemInsert = new SQLStmt("INSERT INTO item VALUES (?, ?, ?, ?, ?)");
+  private final boolean isPostfixNames = workConf.isPostfixNames();
+
+  public final SQLStmt itemInsert =
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_ITEM_ORIG
+                      : TPCCConstants.TABLENAME_ITEM));
 
   public final SQLStmt warehouseInsert =
-      new SQLStmt("INSERT INTO warehouse VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_WAREHOUSE_ORIG
+                      : TPCCConstants.TABLENAME_WAREHOUSE));
 
   public final SQLStmt districtInsert =
-      new SQLStmt("INSERT INTO district VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_DISTRICT_ORIG
+                      : TPCCConstants.TABLENAME_DISTRICT));
 
   public final SQLStmt stockInsert =
-      new SQLStmt("INSERT INTO stock VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_STOCK_ORIG
+                      : TPCCConstants.TABLENAME_STOCK));
 
   public final SQLStmt customerInsert =
       new SQLStmt(
-          "INSERT INTO customer VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_CUSTOMER_ORIG
+                      : TPCCConstants.TABLENAME_CUSTOMER));
 
   public final SQLStmt historyInsert =
-      new SQLStmt("INSERT INTO history VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_HISTORY_ORIG
+                      : TPCCConstants.TABLENAME_HISTORY));
 
   public final SQLStmt openOrderInsert =
-      new SQLStmt("INSERT INTO oorder VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_OPENORDER_ORIG
+                      : TPCCConstants.TABLENAME_OPENORDER));
 
-  public final SQLStmt newOrderInsert = new SQLStmt("INSERT INTO new_order VALUES (?, ?, ?)");
+  public final SQLStmt newOrderInsert =
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_NEWORDER_ORIG
+                      : TPCCConstants.TABLENAME_NEWORDER));
 
   public final SQLStmt orderLineInsert =
-      new SQLStmt("INSERT INTO order_line VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      new SQLStmt(
+          "INSERT INTO %s VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+              .formatted(
+                  isPostfixNames
+                      ? TPCCConstants.TABLENAME_ORDERLINE_ORIG
+                      : TPCCConstants.TABLENAME_ORDERLINE));
 
   private static final int FIRST_UNPROCESSED_O_ID = 2101;
 
@@ -77,17 +125,17 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
     if (this.getDatabaseType() != DatabaseType.SPQR) {
       if (workConf.getStartFromId() == 1) {
         LoaderThread itemsLoader =
-          new LoaderThread(this.benchmark) {
-            @Override
-            public void load(Connection conn) {
-              loadItems(conn, items);
-            }
+            new LoaderThread(this.benchmark) {
+              @Override
+              public void load(Connection conn) {
+                loadItems(conn, items);
+              }
 
-            @Override
-            public void afterLoad() {
-              itemLatch.countDown();
-            }
-          };
+              @Override
+              public void afterLoad() {
+                itemLatch.countDown();
+              }
+            };
         threads.add(itemsLoader);
       }
     } else {
@@ -96,17 +144,17 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
         for (int i = 0; i < numShards; i++) {
           int shard = i;
           LoaderThread itemsLoader =
-            new LoaderThread(this.benchmark) {
-              @Override
-              public void load(List<Connection> connections) {
-                loadItems(connections.get(shard), items);
-              }
+              new LoaderThread(this.benchmark) {
+                @Override
+                public void load(List<Connection> connections) {
+                  loadItems(connections.get(shard), items);
+                }
 
-              @Override
-              public void afterLoad() {
-                itemLatch.countDown();
-              }
-            };
+                @Override
+                public void afterLoad() {
+                  itemLatch.countDown();
+                }
+              };
           threads.add(itemsLoader);
         }
       }
