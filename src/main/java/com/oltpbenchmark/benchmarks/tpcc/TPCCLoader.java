@@ -144,10 +144,10 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
         for (int i = 0; i < numShards; i++) {
           int shard = i;
           LoaderThread itemsLoader =
-              new LoaderThread(this.benchmark) {
+              new LoaderThread(this.benchmark, shard) {
                 @Override
-                public void load(List<Connection> connections) {
-                  loadItems(connections.get(shard), items);
+                public void load(Connection conn) {
+                  loadItems(conn, items);
                 }
 
                 @Override
@@ -251,34 +251,34 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
           final int w_id = warehouse;
           int shard = i;
           LoaderThread t =
-              new LoaderThread(this.benchmark) {
+              new LoaderThread(this.benchmark, shard) {
                 @Override
-                public void load(List<Connection> connections) {
+                public void load(Connection conn) {
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load WAREHOUSE {}", w_id);
                   }
                   // WAREHOUSE
-                  loadWarehouse(connections.get(shard), w_id);
+                  loadWarehouse(conn, w_id);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load STOCK {}", w_id);
                   }
                   // STOCK
-                  loadStock(connections.get(shard), w_id, TPCCConfig.configItemCount);
+                  loadStock(conn, w_id, TPCCConfig.configItemCount);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load DISTRICT {}", w_id);
                   }
                   // DISTRICT
-                  loadDistricts(connections.get(shard), w_id, TPCCConfig.configDistPerWhse);
+                  loadDistricts(conn, w_id, TPCCConfig.configDistPerWhse);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load CUSTOMER {}", w_id);
                   }
                   // CUSTOMER
                   loadCustomers(
-                      connections.get(shard),
+                      conn,
                       w_id,
                       TPCCConfig.configDistPerWhse,
                       TPCCConfig.configCustPerDist);
@@ -288,7 +288,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                   }
                   // CUSTOMER HISTORY
                   loadCustomerHistory(
-                      connections.get(shard),
+                      conn,
                       w_id,
                       TPCCConfig.configDistPerWhse,
                       TPCCConfig.configCustPerDist);
@@ -298,7 +298,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                   }
                   // ORDERS
                   loadOpenOrders(
-                      connections.get(shard),
+                      conn,
                       w_id,
                       TPCCConfig.configDistPerWhse,
                       TPCCConfig.configCustPerDist);
@@ -308,7 +308,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                   }
                   // NEW ORDERS
                   loadNewOrders(
-                      connections.get(shard),
+                      conn,
                       w_id,
                       TPCCConfig.configDistPerWhse,
                       TPCCConfig.configCustPerDist);
@@ -318,7 +318,7 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                   }
                   // ORDER LINES
                   loadOrderLines(
-                      connections.get(shard),
+                      conn,
                       w_id,
                       TPCCConfig.configDistPerWhse,
                       TPCCConfig.configCustPerDist);

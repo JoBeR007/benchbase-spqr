@@ -34,8 +34,15 @@ public abstract class LoaderThread implements Runnable {
 
   private final BenchmarkModule benchmarkModule;
 
+  private int shardId;
+
   public LoaderThread(BenchmarkModule benchmarkModule) {
     this.benchmarkModule = benchmarkModule;
+  }
+
+  public LoaderThread(BenchmarkModule benchmarkModule, int shardId) {
+    this.benchmarkModule = benchmarkModule;
+    this.shardId = shardId;
   }
 
   @Override
@@ -56,9 +63,8 @@ public abstract class LoaderThread implements Runnable {
         afterLoad();
       }
     } else {
-      try {
-        List<Connection> connections = benchmarkModule.makeShardConnections();
-        load(connections);
+      try(Connection conn = benchmarkModule.makeShardConnection(shardId)) {
+        load(conn);
       } catch (SQLException ex) {
         SQLException next_ex = ex.getNextException();
         String msg =
