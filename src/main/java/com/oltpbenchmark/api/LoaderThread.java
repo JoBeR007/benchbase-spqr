@@ -63,7 +63,7 @@ public abstract class LoaderThread implements Runnable {
         afterLoad();
       }
     } else {
-      try(Connection conn = benchmarkModule.makeShardConnection(shardId)) {
+      try (Connection conn = benchmarkModule.makeShardConnection(shardId)) {
         load(conn);
       } catch (SQLException ex) {
         SQLException next_ex = ex.getNextException();

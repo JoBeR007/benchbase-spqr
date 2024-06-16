@@ -278,50 +278,35 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
                   }
                   // CUSTOMER
                   loadCustomers(
-                      conn,
-                      w_id,
-                      TPCCConfig.configDistPerWhse,
-                      TPCCConfig.configCustPerDist);
+                      conn, w_id, TPCCConfig.configDistPerWhse, TPCCConfig.configCustPerDist);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load CUSTOMER HISTORY {}", w_id);
                   }
                   // CUSTOMER HISTORY
                   loadCustomerHistory(
-                      conn,
-                      w_id,
-                      TPCCConfig.configDistPerWhse,
-                      TPCCConfig.configCustPerDist);
+                      conn, w_id, TPCCConfig.configDistPerWhse, TPCCConfig.configCustPerDist);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load ORDERS {}", w_id);
                   }
                   // ORDERS
                   loadOpenOrders(
-                      conn,
-                      w_id,
-                      TPCCConfig.configDistPerWhse,
-                      TPCCConfig.configCustPerDist);
+                      conn, w_id, TPCCConfig.configDistPerWhse, TPCCConfig.configCustPerDist);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load NEW ORDERS {}", w_id);
                   }
                   // NEW ORDERS
                   loadNewOrders(
-                      conn,
-                      w_id,
-                      TPCCConfig.configDistPerWhse,
-                      TPCCConfig.configCustPerDist);
+                      conn, w_id, TPCCConfig.configDistPerWhse, TPCCConfig.configCustPerDist);
 
                   if (LOG.isDebugEnabled()) {
                     LOG.debug("Starting to load ORDER LINES {}", w_id);
                   }
                   // ORDER LINES
                   loadOrderLines(
-                      conn,
-                      w_id,
-                      TPCCConfig.configDistPerWhse,
-                      TPCCConfig.configCustPerDist);
+                      conn, w_id, TPCCConfig.configDistPerWhse, TPCCConfig.configCustPerDist);
                 }
 
                 @Override

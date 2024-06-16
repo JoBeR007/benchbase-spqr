@@ -120,7 +120,7 @@ public abstract class BenchmarkModule {
     properties.setProperty("password", workConf.getPassword());
     properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
 
-    return DriverManager.getConnection(workConf.getShardUrls().get(shardId - 1), properties);
+    return DriverManager.getConnection(workConf.getShardUrls().get(shardId), properties);
   }
 
   private String afterLoadScriptPath = null;
