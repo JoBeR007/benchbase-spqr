@@ -114,12 +114,14 @@ public abstract class BenchmarkModule {
     return res;
   }
 
-  public final Connection makeShardConnection(int shardId) throws SQLException {
+  public final Connection makeShardConnection(int shardId, boolean useSimpleProtocol)
+      throws SQLException {
     Properties properties = new Properties();
     properties.setProperty("user", workConf.getUsername());
     properties.setProperty("password", workConf.getPassword());
-    properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
-
+    if (useSimpleProtocol) {
+      properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
+    }
     return DriverManager.getConnection(workConf.getShardUrls().get(shardId), properties);
   }
 
