@@ -123,21 +123,19 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
     // ITEM
     // This will be invoked first and executed in a single thread.
     if (this.getDatabaseType() != DatabaseType.SPQR) {
-      if (workConf.getStartFromId() == 1) {
-        LoaderThread itemsLoader =
-            new LoaderThread(this.benchmark) {
-              @Override
-              public void load(Connection conn) {
-                loadItems(conn, items);
-              }
+      LoaderThread itemsLoader =
+          new LoaderThread(this.benchmark) {
+            @Override
+            public void load(Connection conn) {
+              loadItems(conn, items);
+            }
 
-              @Override
-              public void afterLoad() {
-                itemLatch.countDown();
-              }
-            };
-        threads.add(itemsLoader);
-      }
+            @Override
+            public void afterLoad() {
+              itemLatch.countDown();
+            }
+          };
+      threads.add(itemsLoader);
     } else {
       if (workConf.getStartFromId() == 1) {
         int numShards = workConf.getShardUrls().size();
