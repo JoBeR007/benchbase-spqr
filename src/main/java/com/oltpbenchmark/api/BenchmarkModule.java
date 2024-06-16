@@ -254,9 +254,11 @@ public abstract class BenchmarkModule {
         this.createDatabase(this.workConf.getDatabaseType(), conn);
       }
     } else {
-      List<Connection> connections = this.makeShardConnections();
-      for (Connection c : connections) {
-        this.createDatabase(this.workConf.getDatabaseType(), c);
+      int numShards = workConf.getShardUrls().size();
+      for(int shard = 0; shard < numShards; shard++){
+        try (Connection conn = this.makeShardConnection(shard, true)) {
+          this.createDatabase(this.workConf.getDatabaseType(), conn);
+        }
       }
     }
   }
