@@ -702,14 +702,13 @@ public final class TPCCLoader extends Loader<TPCCBenchmark> {
           openOrderStatement.setInt(idx++, oorder.o_id);
           openOrderStatement.setInt(idx++, oorder.o_c_id);
           if (oorder.o_carrier_id != null) {
-            openOrderStatement.setString(idx++, String.valueOf(oorder.o_carrier_id));
+            openOrderStatement.setInt(idx++, oorder.o_carrier_id);
           } else {
-            // openOrderStatement.setNull(idx++, Types.INTEGER);
-            idx++;
+            openOrderStatement.setNull(idx++, Types.INTEGER);
           }
-          openOrderStatement.setString(idx++, String.valueOf(oorder.o_ol_cnt));
-          openOrderStatement.setString(idx++, String.valueOf(oorder.o_all_local));
-          openOrderStatement.setString(idx, String.valueOf(oorder.o_entry_d));
+          openOrderStatement.setInt(idx++, oorder.o_ol_cnt);
+          openOrderStatement.setInt(idx++, oorder.o_all_local);
+          openOrderStatement.setTimestamp(idx, oorder.o_entry_d);
           openOrderStatement.addBatch();
 
           k++;
