@@ -96,24 +96,6 @@ public abstract class BenchmarkModule {
     }
   }
 
-  public final List<Connection> makeShardConnections() throws SQLException {
-    List<Connection> res = new ArrayList<>();
-
-    for (int i = 0; i < workConf.getShardUrls().size(); i++) {
-      if (StringUtils.isEmpty(workConf.getUsername())) {
-        res.add(DriverManager.getConnection(workConf.getShardUrls().get(i)));
-      } else {
-        Properties properties = new Properties();
-        properties.setProperty("user", workConf.getUsername());
-        properties.setProperty("password", workConf.getPassword());
-        properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
-
-        res.add(DriverManager.getConnection(workConf.getShardUrls().get(i), properties));
-      }
-    }
-    return res;
-  }
-
   public final Connection makeShardConnection(int shardId, boolean useSimpleProtocol)
       throws SQLException {
     Properties properties = new Properties();
@@ -255,7 +237,7 @@ public abstract class BenchmarkModule {
       }
     } else {
       int numShards = workConf.getShardUrls().size();
-      for(int shard = 0; shard < numShards; shard++){
+      for (int shard = 0; shard < numShards; shard++) {
         try (Connection conn = this.makeShardConnection(shard, true)) {
           this.createDatabase(this.workConf.getDatabaseType(), conn);
         }
