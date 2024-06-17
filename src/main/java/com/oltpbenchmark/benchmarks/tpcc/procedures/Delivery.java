@@ -22,7 +22,6 @@ import com.oltpbenchmark.benchmarks.tpcc.TPCCConfig;
 import com.oltpbenchmark.benchmarks.tpcc.TPCCConstants;
 import com.oltpbenchmark.benchmarks.tpcc.TPCCUtil;
 import com.oltpbenchmark.benchmarks.tpcc.TPCCWorker;
-import java.math.BigDecimal;
 import java.sql.*;
 import java.util.Random;
 import org.slf4j.Logger;

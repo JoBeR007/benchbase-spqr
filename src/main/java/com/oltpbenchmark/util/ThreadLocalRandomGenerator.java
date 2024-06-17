@@ -15,8 +15,7 @@
  *
  */
 
-
- package com.oltpbenchmark.util;
+package com.oltpbenchmark.util;
 
 import java.util.concurrent.ThreadLocalRandom;
 
