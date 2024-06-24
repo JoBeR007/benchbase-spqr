@@ -146,6 +146,10 @@ CREATE TABLE order_line_orig (
     PRIMARY KEY (OL_W_ID, OL_D_ID, OL_O_ID, OL_NUMBER)
 );
 
+CREATE INDEX idx_item_name on item_orig (I_ID);
+
+CREATE INDEX idx_warehouse_name on warehouse_orig (W_ID);
+
 CREATE INDEX idx_district_name ON district_orig (D_W_ID, D_ID);
 
 CREATE INDEX idx_customer_name ON customer_orig (C_W_ID, C_D_ID, C_LAST, C_FIRST);
