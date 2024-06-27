@@ -84,9 +84,27 @@ public abstract class BenchmarkModule {
     if (StringUtils.isEmpty(workConf.getUsername())) {
       return DriverManager.getConnection(workConf.getUrl());
     } else {
-      return DriverManager.getConnection(
-          workConf.getUrl(), workConf.getUsername(), workConf.getPassword());
+      Properties properties = new Properties();
+      properties.setProperty("user", workConf.getUsername());
+      properties.setProperty("password", workConf.getPassword());
+
+      if (workConf.getDatabaseType() == DatabaseType.SPQR
+          || workConf.getDatabaseType() == DatabaseType.POSTGRES)
+        properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
+
+      return DriverManager.getConnection(workConf.getUrl(), properties);
     }
+  }
+
+  public final Connection makeShardConnection(int shardId, boolean useSimpleProtocol)
+      throws SQLException {
+    Properties properties = new Properties();
+    properties.setProperty("user", workConf.getUsername());
+    properties.setProperty("password", workConf.getPassword());
+    if (useSimpleProtocol) {
+      properties.setProperty("preferQueryMode", workConf.getPreferQueryMode());
+    }
+    return DriverManager.getConnection(workConf.getShardUrls().get(shardId), properties);
   }
 
   private String afterLoadScriptPath = null;
@@ -165,7 +183,11 @@ public abstract class BenchmarkModule {
       DatabaseType ddl_db_type = db_type;
       // HACK: Use MySQL if we're given MariaDB
       if (ddl_db_type == DatabaseType.MARIADB) ddl_db_type = DatabaseType.MYSQL;
-      names.add("ddl-" + ddl_db_type.name().toLowerCase() + ".sql");
+      names.add(
+          "ddl-"
+              + ddl_db_type.name().toLowerCase()
+              + (workConf.isPostfixNames() ? "-orig" : "")
+              + ".sql");
     }
     names.add("ddl-generic.sql");
 
@@ -209,8 +231,17 @@ public abstract class BenchmarkModule {
    * (e.g., table, indexes, etc) needed for this benchmark
    */
   public final void createDatabase() throws SQLException, IOException {
-    try (Connection conn = this.makeConnection()) {
-      this.createDatabase(this.workConf.getDatabaseType(), conn);
+    if (this.workConf.getDatabaseType() != DatabaseType.SPQR) {
+      try (Connection conn = this.makeConnection()) {
+        this.createDatabase(this.workConf.getDatabaseType(), conn);
+      }
+    } else {
+      int numShards = workConf.getShardUrls().size();
+      for (int shard = 0; shard < numShards; shard++) {
+        try (Connection conn = this.makeShardConnection(shard, true)) {
+          this.createDatabase(this.workConf.getDatabaseType(), conn);
+        }
+      }
     }
   }
 

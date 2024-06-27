@@ -94,9 +94,10 @@ public class StockLevel extends TPCCProcedure {
   private int getOrderId(Connection conn, int w_id, int d_id) throws SQLException {
     try (PreparedStatement stockGetDistOrderId =
         this.getPreparedStatement(conn, stockGetDistOrderIdSQL)) {
-      stockGetDistOrderId.setInt(1, w_id);
-      stockGetDistOrderId.setInt(2, d_id);
-
+      /*stockGetDistOrderId.setInt(1, w_id);
+      stockGetDistOrderId.setInt(2, d_id);*/
+      stockGetDistOrderId.setString(1, String.valueOf(w_id));
+      stockGetDistOrderId.setString(2, String.valueOf(d_id));
       try (ResultSet rs = stockGetDistOrderId.executeQuery()) {
 
         if (!rs.next()) {
@@ -111,12 +112,18 @@ public class StockLevel extends TPCCProcedure {
       throws SQLException {
     try (PreparedStatement stockGetCountStock =
         this.getPreparedStatement(conn, stockGetCountStockSQL)) {
-      stockGetCountStock.setInt(1, w_id);
+      /*stockGetCountStock.setInt(1, w_id);
       stockGetCountStock.setInt(2, d_id);
       stockGetCountStock.setInt(3, o_id);
       stockGetCountStock.setInt(4, o_id - 20);
       stockGetCountStock.setInt(5, w_id);
-      stockGetCountStock.setInt(6, threshold);
+      stockGetCountStock.setInt(6, threshold);*/
+      stockGetCountStock.setString(1, String.valueOf(w_id));
+      stockGetCountStock.setString(2, String.valueOf(d_id));
+      stockGetCountStock.setString(3, String.valueOf(o_id));
+      stockGetCountStock.setString(4, String.valueOf(o_id - 20));
+      stockGetCountStock.setString(5, String.valueOf(w_id));
+      stockGetCountStock.setString(6, String.valueOf(threshold));
 
       try (ResultSet rs = stockGetCountStock.executeQuery()) {
         if (!rs.next()) {

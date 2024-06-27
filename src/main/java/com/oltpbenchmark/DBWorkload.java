@@ -50,6 +50,9 @@ public class DBWorkload {
 
   private static final String RATE_DISABLED = "disabled";
   private static final String RATE_UNLIMITED = "unlimited";
+  private static Boolean useRealThreads = false;
+  private static Boolean usePostfixNames = false;
+  private static DatabaseType databaseType;
 
   /**
    * @param args
@@ -79,10 +82,23 @@ public class DBWorkload {
       return;
     }
 
+    if (argsLine.hasOption("rt")) {
+      useRealThreads = true;
+    }
+
+    if (argsLine.hasOption("pn")) {
+      usePostfixNames = true;
+    }
+
     // Seconds
     int intervalMonitor = 0;
     if (argsLine.hasOption("im")) {
       intervalMonitor = Integer.parseInt(argsLine.getOptionValue("im"));
+    }
+
+    int startFromId = 1;
+    if (argsLine.hasOption("sf")) {
+      startFromId = Integer.parseInt(argsLine.getOptionValue("sf"));
     }
 
     // -------------------------------------------------------------------
@@ -115,18 +131,33 @@ public class DBWorkload {
       wrkld.setXmlConfig(xmlConfig);
 
       // Pull in database configuration
-      wrkld.setDatabaseType(DatabaseType.get(xmlConfig.getString("type")));
+      databaseType = DatabaseType.get(xmlConfig.getString("type"));
+      wrkld.setDatabaseType(databaseType);
       wrkld.setDriverClass(xmlConfig.getString("driver"));
       wrkld.setUrl(xmlConfig.getString("url"));
       wrkld.setUsername(xmlConfig.getString("username"));
       wrkld.setPassword(xmlConfig.getString("password"));
+      wrkld.setPreferQueryMode(xmlConfig.getString("preferQueryMode"));
       wrkld.setRandomSeed(xmlConfig.getInt("randomSeed", -1));
       wrkld.setBatchSize(xmlConfig.getInt("batchsize", 128));
       wrkld.setMaxRetries(xmlConfig.getInt("retries", 3));
       wrkld.setNewConnectionPerTxn(xmlConfig.getBoolean("newConnectionPerTxn", false));
       wrkld.setReconnectOnConnectionFailure(
           xmlConfig.getBoolean("reconnectOnConnectionFailure", false));
-
+      wrkld.setShardUrls(Arrays.asList(xmlConfig.getStringArray("shardUrls/shardUrl")));
+      String[] upperLimitsStr = xmlConfig.getStringArray("upperLimits/upperLimit");
+      List<Integer> upperLimits =
+          Arrays.stream(upperLimitsStr)
+              .map(
+                  string -> {
+                    try {
+                      return Integer.parseInt(string);
+                    } catch (NumberFormatException e) {
+                      throw new NumberFormatException("Error while trying to parse upper limits");
+                    }
+                  })
+              .toList();
+      wrkld.setUpperLimitsPerShard(upperLimits);
       int terminals = xmlConfig.getInt("terminals[not(@bench)]", 0);
       terminals = xmlConfig.getInt("terminals" + pluginTest, terminals);
       wrkld.setTerminals(terminals);
@@ -139,9 +170,13 @@ public class DBWorkload {
       String isolationMode =
           xmlConfig.getString("isolation[not(@bench)]", "TRANSACTION_SERIALIZABLE");
       wrkld.setIsolationMode(xmlConfig.getString("isolation" + pluginTest, isolationMode));
-      wrkld.setScaleFactor(xmlConfig.getDouble("scalefactor", 1.0));
+      if (wrkld.getDatabaseType() == DatabaseType.SPQR && wrkld.getBenchmarkName().equals("tpcc"))
+        wrkld.setScaleFactor(upperLimits.get(upperLimits.size() - 1));
+      else wrkld.setScaleFactor(xmlConfig.getDouble("scalefactor", 1.0));
       wrkld.setDataDir(xmlConfig.getString("datadir", "."));
       wrkld.setDDLPath(xmlConfig.getString("ddlpath", null));
+      wrkld.setStartFromId(startFromId);
+      wrkld.setPostfixNames(usePostfixNames);
 
       double selectivity = -1;
       try {
@@ -384,6 +419,7 @@ public class DBWorkload {
           System.exit(-1);
         }
 
+        wrkld.setWarmupTime(warmup);
         ArrayList<Double> weights = new ArrayList<>();
 
         double totalWeight = 0;
@@ -473,10 +509,11 @@ public class DBWorkload {
     }
 
     // Refresh the catalog.
-    for (BenchmarkModule benchmark : benchList) {
-      benchmark.refreshCatalog();
+    if (databaseType != DatabaseType.SPQR) {
+      for (BenchmarkModule benchmark : benchList) {
+        benchmark.refreshCatalog();
+      }
     }
-
     // Clear the Benchmark's Database
     if (isBooleanOptionSet(argsLine, "clear")) {
       try {
@@ -567,6 +604,13 @@ public class DBWorkload {
         "Base directory for the result files, default is current directory");
     options.addOption(null, "dialects-export", true, "Export benchmark SQL to a dialects file");
     options.addOption("jh", "json-histograms", true, "Export histograms to JSON file");
+    options.addOption("rt", "real-threads", false, "Use real threads");
+    options.addOption("sf", "start-from-id", true, "Start load from a specific scale id");
+    options.addOption(
+        "pn",
+        "postfix-names",
+        false,
+        "Use TPC-C table names with postfix \"_orig\" in create and load phase for SPQR");
     return options;
   }
 
@@ -748,7 +792,8 @@ public class DBWorkload {
               bench.getBenchmarkName().toUpperCase(), num_phases, (num_phases > 1 ? "s" : "")));
       workConfs.add(bench.getWorkloadConfiguration());
     }
-    Results r = ThreadBench.runRateLimitedBenchmark(workers, workConfs, intervalMonitor);
+    Results r =
+        ThreadBench.runRateLimitedBenchmark(workers, workConfs, intervalMonitor, useRealThreads);
     LOG.info(SINGLE_LINE);
     LOG.info("Rate limited reqs/s: {}", r);
     return r;

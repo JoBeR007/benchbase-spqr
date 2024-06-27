@@ -41,6 +41,7 @@ public class WorkloadConfiguration {
   private double selectivity = -1.0;
   private int terminals;
   private int loaderThreads = ThreadUtil.availableProcessors();
+  private int warmupTime = 0;
   private XMLConfiguration xmlConfig = null;
   private WorkloadState workloadState;
   private TransactionTypes transTypes = null;
@@ -60,6 +61,12 @@ public class WorkloadConfiguration {
    * primary-secondary failover.
    */
   private boolean reconnectOnConnectionFailure = false;
+
+  private String preferQueryMode = "";
+  private List<String> shardUrls;
+  private List<Integer> upperLimitsPerShard;
+  private int startFromId = 0;
+  private boolean isPostfixNames = false;
 
   public String getBenchmarkName() {
     return benchmarkName;
@@ -209,12 +216,28 @@ public class WorkloadConfiguration {
     this.loaderThreads = loaderThreads;
   }
 
+  public int getWarmupTime() {
+    return this.warmupTime;
+  }
+
+  public void setWarmupTime(int time) {
+    this.warmupTime = time;
+  }
+
   public double getSelectivity() {
     return this.selectivity;
   }
 
   public void setSelectivity(double selectivity) {
     this.selectivity = selectivity;
+  }
+
+  public String getPreferQueryMode() {
+    return preferQueryMode;
+  }
+
+  public void setPreferQueryMode(String preferQueryMode) {
+    this.preferQueryMode = preferQueryMode;
   }
 
   /**
@@ -409,5 +432,40 @@ public class WorkloadConfiguration {
         + dataDir
         + '\''
         + '}';
+  }
+
+  /** Returns list of urls for straight to shard connection */
+  public List<String> getShardUrls() {
+    return shardUrls;
+  }
+
+  /** Sets list of urls for straight to shard connection */
+  public void setShardUrls(List<String> shardUrls) {
+    this.shardUrls = shardUrls;
+  }
+
+  /** In TPC-C context warehouse id's that are stored at corresponding shard number */
+  public List<Integer> getUpperLimitsPerShard() {
+    return upperLimitsPerShard;
+  }
+
+  public void setUpperLimitsPerShard(List<Integer> upperLimitsPerShard) {
+    this.upperLimitsPerShard = upperLimitsPerShard;
+  }
+
+  public int getStartFromId() {
+    return startFromId;
+  }
+
+  public void setStartFromId(int startFromId) {
+    this.startFromId = startFromId;
+  }
+
+  public boolean isPostfixNames() {
+    return isPostfixNames;
+  }
+
+  public void setPostfixNames(boolean postfixNames) {
+    isPostfixNames = postfixNames;
   }
 }
