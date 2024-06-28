@@ -65,8 +65,15 @@ public class DBWorkload {
     CommandLineParser parser = new DefaultParser();
 
     // path to target
-    File targetFile = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
-    Path projectPath = targetFile.toPath().getParent();
+    File targetFile = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+    Path projectPath = targetFile.toPath();
+    // if executed from IDE, targetFile path contains /classes dir so needs 1 more parent dir
+    projectPath =
+      targetFile.toString().contains("/classes")
+        ? projectPath.getParent().getParent()
+        : projectPath.getParent();
+
     Path configFilePath = projectPath.resolve("config/plugin.xml");
 
     XMLConfiguration pluginConfig = buildConfiguration(String.valueOf(configFilePath));
