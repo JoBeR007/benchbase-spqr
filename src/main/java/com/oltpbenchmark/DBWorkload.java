@@ -27,6 +27,7 @@ import com.oltpbenchmark.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.util.*;
 import org.apache.commons.cli.*;
@@ -64,9 +65,10 @@ public class DBWorkload {
     CommandLineParser parser = new DefaultParser();
 
     // path to target
-    File targetPath = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+    File targetFile = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+    Path projectPath = targetFile.toPath().getParent();
 
-    XMLConfiguration pluginConfig = buildConfiguration(targetPath.getParent() + "/config/plugin.xml");
+    XMLConfiguration pluginConfig = buildConfiguration(projectPath.toString() + "/config/plugin.xml");
 
     Options options = buildOptions(pluginConfig);
 
