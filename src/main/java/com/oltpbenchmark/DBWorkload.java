@@ -63,7 +63,10 @@ public class DBWorkload {
     // create the command line parser
     CommandLineParser parser = new DefaultParser();
 
-    XMLConfiguration pluginConfig = buildConfiguration("config/plugin.xml");
+    // path to target
+    File targetPath = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
+
+    XMLConfiguration pluginConfig = buildConfiguration(targetPath.getParent() + "/config/plugin.xml");
 
     Options options = buildOptions(pluginConfig);
 
