@@ -67,8 +67,9 @@ public class DBWorkload {
     // path to target
     File targetFile = new File(DBWorkload.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile();
     Path projectPath = targetFile.toPath().getParent();
+    Path configFilePath = projectPath.resolve("config/plugin.xml");
 
-    XMLConfiguration pluginConfig = buildConfiguration(projectPath.toString() + "/config/plugin.xml");
+    XMLConfiguration pluginConfig = buildConfiguration(String.valueOf(configFilePath));
 
     Options options = buildOptions(pluginConfig);
 
